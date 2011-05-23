@@ -4,6 +4,8 @@ from django.contrib.admin.widgets import FilteredSelectMultiple
 from shop_simplecategories.models import Category
 from django import forms
 from django.utils.translation import ugettext_lazy as _
+from sorl.thumbnail.admin.current import AdminImageWidget
+from sorl.thumbnail.fields import ImageField
 
 class ProductWithCategoryForm(forms.ModelForm):
   categories = forms.ModelMultipleChoiceField(
@@ -33,4 +35,14 @@ class ProductWithCategoryForm(forms.ModelForm):
     return product
 
 
-admin.site.register(Category)
+class CategoryAdmin(admin.ModelAdmin):
+    fieldsets = [
+        ['', {'fields': ['name', 'slug', 'parent_category', 'order', 'image', 'products']}]
+    ]
+    list_display = ['admin_thumbnail', 'name', 'parent_category', 'order']
+    list_editable = ['order']
+    formfield_overrides = {
+        ImageField: {'widget': AdminImageWidget}
+    }
+
+admin.site.register(Category, CategoryAdmin)

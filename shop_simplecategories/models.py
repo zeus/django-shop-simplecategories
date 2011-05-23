@@ -3,11 +3,21 @@ from django.core.urlresolvers import reverse
 from django.db import models
 from shop.models.productmodel import Product
 from django.utils.translation import ugettext_lazy as _
+from sorl.thumbnail import ImageField, get_thumbnail
+from sorl.thumbnail.helpers import ThumbnailError
+from django.conf import settings
+import uuid
+import os
 
 class CategoryManager(models.Manager):
     def root_categories(self):
         return self.filter(parent_category__isnull=True)
 
+
+def get_file_path(instance, filename):
+    ext = filename.split('.')[-1]
+    filename = "%s.%s" % (uuid.uuid4(), ext)
+    return os.path.join(getattr(settings, 'CATEGORY_IMAGE_UPLOAD_TO', 'categories/'), filename)
 
 class Category(models.Model):
     '''
@@ -36,6 +46,7 @@ class Category(models.Model):
                                       verbose_name=_('Products'),
                                       )
     order = models.IntegerField(verbose_name=_('Ordering'), default=0)
+    image = ImageField(verbose_name=_('File'), upload_to=get_file_path, null=True, blank=True)
     objects = CategoryManager()
     
     def __unicode__(self):
@@ -52,4 +63,15 @@ class Category(models.Model):
 
     def get_child_categories(self):
         return Category.objects.filter(parent_category=self)
+
+    def admin_thumbnail(self):
+        try:
+            return '<img src="%s">' % get_thumbnail(self.image, '50x50', crop='center').url
+        except IOError:
+            return 'IOError'
+        except ThumbnailError, ex:
+            return 'ThumbnailError, %s' % ex.message
+
+    admin_thumbnail.short_description = _('Thumbnail')
+    admin_thumbnail.allow_tags = True
 
