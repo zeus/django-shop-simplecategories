@@ -6,6 +6,8 @@ from django import forms
 from django.utils.translation import ugettext_lazy as _
 from sorl.thumbnail.admin.current import AdminImageWidget
 from sorl.thumbnail.fields import ImageField
+from django.db.models import ManyToManyField
+from shop.models import Product
 
 class ProductWithCategoryForm(forms.ModelForm):
   categories = forms.ModelMultipleChoiceField(
@@ -34,6 +36,18 @@ class ProductWithCategoryForm(forms.ModelForm):
 
     return product
 
+class CategoryAdminForm(forms.ModelForm):
+    class Meta(object):
+        model = Category
+
+    products = forms.ModelMultipleChoiceField(
+        queryset = Product.objects.all(),
+        required=False,
+        widget=FilteredSelectMultiple(
+          verbose_name=_('products'),
+          is_stacked=False
+        )
+    )
 
 class CategoryAdmin(admin.ModelAdmin):
     fieldsets = [
@@ -42,7 +56,9 @@ class CategoryAdmin(admin.ModelAdmin):
     list_display = ['admin_thumbnail', 'name', 'parent_category', 'order']
     list_editable = ['order']
     formfield_overrides = {
-        ImageField: {'widget': AdminImageWidget}
+        ImageField: {'widget': AdminImageWidget},
+        #ManyToManyField: {'widget': FilteredSelectMultiple}
     }
+    form = CategoryAdminForm
 
 admin.site.register(Category, CategoryAdmin)
