@@ -1,0 +1,5 @@
+{% for category in category_list %}
+    {% with category as object %}
+        {% include "shop_simplecategories/category_preview.html" %}
+    {% endwith %}
+{% endfor %}

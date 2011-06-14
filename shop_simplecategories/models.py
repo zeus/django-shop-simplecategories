@@ -20,13 +20,13 @@ def get_file_path(instance, filename):
     return os.path.join(getattr(settings, 'CATEGORY_IMAGE_UPLOAD_TO', 'categories/'), filename)
 
 class Category(models.Model):
-    '''
+    """
     This should be a node in a tree (mptt?) structure representing categories
     of products.
     Ideally, this should be usable as a tag cloud too (tags are just categories
     that are not in a tree structure). The display logic should be handle on a
     per-site basis
-    '''
+    """
 
     class Meta(object):
         verbose_name = _("category")
@@ -48,6 +48,8 @@ class Category(models.Model):
     order = models.IntegerField(verbose_name=_('Ordering'), default=0)
     image = ImageField(verbose_name=_('File'), upload_to=get_file_path, null=True, blank=True)
     objects = CategoryManager()
+
+    description = models.TextField(blank=True, null=True)
     
     def __unicode__(self):
         return self.name
@@ -56,9 +58,9 @@ class Category(models.Model):
         return reverse('category_detail', args=[self.slug])
 
     def get_products(self):
-        '''
+        """
         Gets the products belonging to this category (not recursively)
-        '''
+        """
         return self.products.all()
 
     def get_child_categories(self):

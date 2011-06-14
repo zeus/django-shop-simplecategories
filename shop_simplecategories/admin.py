@@ -51,13 +51,14 @@ class CategoryAdminForm(forms.ModelForm):
 
 class CategoryAdmin(admin.ModelAdmin):
     fieldsets = [
-        ['', {'fields': ['name', 'slug', 'parent_category', 'order', 'image', 'products']}]
+        ['', {'fields': ['name', 'slug', 'parent_category', 'order', 'image']}],
+        [_('Products'), {'fields': ['products'], 'classes': ('collapse',)}],
+        [_('Description'), {'fields': ['description'], 'classes': ('collapse',)}]
     ]
     list_display = ['admin_thumbnail', 'name', 'parent_category', 'order']
     list_editable = ['order']
     formfield_overrides = {
         ImageField: {'widget': AdminImageWidget},
-        #ManyToManyField: {'widget': FilteredSelectMultiple}
     }
     form = CategoryAdminForm
 

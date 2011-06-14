@@ -3,18 +3,5 @@
 
 <h1>Categories list</h1>
 {% for object in object_list %}
-
-    <div class='category'>
-        <div class='category-image'>
-            <a href="{{ object.get_absolute_url }}">
-            {% thumbnail object.image "75x75" as image %}
-                <img class="preview" {% if object.name %} alt="{{ object.name }}" {% endif %} src="{{ image.url }}">
-            {% endthumbnail %}
-            </a>
-        </div>
-
-        <div class="category-name"><a href="{{ object.get_absolute_url }}">{{ object.name }}</a></div>
-
-    </div>
-
+    {% include "shop_simplecategories/category_preview.html" %}
 {% endfor %}
