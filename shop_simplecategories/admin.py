@@ -61,5 +61,6 @@ class CategoryAdmin(admin.ModelAdmin):
         ImageField: {'widget': AdminImageWidget},
     }
     form = CategoryAdminForm
+    prepopulated_fields = {'slug': ['name']}
 
 admin.site.register(Category, CategoryAdmin)
