@@ -46,7 +46,7 @@ class Category(models.Model):
                                       verbose_name=_('Products'),
                                       )
     order = models.IntegerField(verbose_name=_('Ordering'), default=0)
-    image = ImageField(verbose_name=_('File'), upload_to=get_file_path, null=True, blank=True)
+    image = ImageField(verbose_name=_('Cover'), upload_to=get_file_path, null=True, blank=True)
     objects = CategoryManager()
 
     description = models.TextField(blank=True, null=True)
