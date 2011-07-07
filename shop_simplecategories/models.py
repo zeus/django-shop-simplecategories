@@ -66,6 +66,41 @@ class Category(models.Model):
     def get_child_categories(self):
         return Category.objects.filter(parent_category=self)
 
+    def get_parents_as_tree(self, max_depth=10):
+        root_cats = []
+        current_category = self
+        while max_depth:
+            max_depth -= 1
+            # Collect siblings
+            level_categories = list(
+                Category.objects.filter(parent_category=current_category.parent_category)
+            )
+            # Set active level
+            for c in level_categories:
+                if current_category == c:
+                    c.active = True
+                    if root_cats:
+                        c.sub_categories = root_cats
+                    break
+            root_cats = level_categories
+            if not current_category.parent_category:
+                break
+            current_category = current_category.parent_category
+        return root_cats
+
+    def get_parents_as_list(self, max_depth=10):
+        def rec(arr):
+            output = []
+            for i in arr:
+                output.append(i)
+                if hasattr(i, 'sub_categories'):
+                    subs = rec(i.sub_categories)
+                    i.IN = True
+                    subs[-1].OUT = True
+                    output += subs
+            return output
+        return rec(self.get_parents_as_tree(max_depth))
+
     def admin_thumbnail(self):
         try:
             return '<img src="%s">' % get_thumbnail(self.image, '50x50', crop='center').url
