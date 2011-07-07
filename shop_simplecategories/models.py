@@ -19,6 +19,17 @@ def get_file_path(instance, filename):
     filename = "%s.%s" % (uuid.uuid4(), ext)
     return os.path.join(getattr(settings, 'CATEGORY_IMAGE_UPLOAD_TO', 'categories/'), filename)
 
+def rec(arr):
+    output = []
+    for i in arr:
+        output.append(i)
+        if hasattr(i, 'sub_categories'):
+            subs = rec(i.sub_categories)
+            i.IN = True
+            subs[-1].OUT = True
+            output += subs
+    return output
+
 class Category(models.Model):
     """
     This should be a node in a tree (mptt?) structure representing categories
@@ -66,11 +77,15 @@ class Category(models.Model):
     def get_child_categories(self):
         return Category.objects.filter(parent_category=self)
 
-    def get_parents_as_tree(self, max_depth=10):
+    def get_parents_as_tree(self, max_depth=10, add_childrens=False):
         root_cats = []
+        if add_childrens:
+            root_cats = list(Category.objects.filter(parent_category=self))
         current_category = self
         while max_depth:
             max_depth -= 1
+            if max_depth <=0:
+                break
             # Collect siblings
             level_categories = list(
                 Category.objects.filter(parent_category=current_category.parent_category)
@@ -89,17 +104,10 @@ class Category(models.Model):
         return root_cats
 
     def get_parents_as_list(self, max_depth=10):
-        def rec(arr):
-            output = []
-            for i in arr:
-                output.append(i)
-                if hasattr(i, 'sub_categories'):
-                    subs = rec(i.sub_categories)
-                    i.IN = True
-                    subs[-1].OUT = True
-                    output += subs
-            return output
         return rec(self.get_parents_as_tree(max_depth))
+
+    def get_tree_as_list(self, max_depth=10):
+        return rec(self.get_parents_as_tree(add_childrens=True))
 
     def admin_thumbnail(self):
         try:
